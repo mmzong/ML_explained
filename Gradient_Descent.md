@@ -57,6 +57,7 @@ Gradient Descent step:
 *** Add sentence about it
 
 ## Implementation
+*** Add different example using library of Gradient Descent
 
 ```
 eta = 0.1 # learning rate
