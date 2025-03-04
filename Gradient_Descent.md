@@ -5,6 +5,7 @@
 * gradient = slope or rate of change
 
 ## Definition
+### Gradient Descent
 **Gradient Descent** is a generic optimization algorithm that is used on a wide variety of problems. Here we will talk about how it is used in Machine Learning. 
 
 The general goal of Gradient Descent is to tweak parameters iteratively to *minimize* a cost function. If you are lost on a mountain in a dense fog and you're trying to get to the bottom as quickly as you can, a good strategy would be to go downhill in the direction of the steepest local slope that you can feel with your feet. This is exactly what Gradient Descent does, the slope of the mountain is the cost function you are trying to find the minima of. For this explanation we will use *Mean Squared Error (MSE)* as our cost function. 
@@ -53,12 +54,26 @@ Gradient Descent step:
 \theta^{(next step)} = \theta - \eta*\nabla_{\theta}  MSE(\theta)
 ```
 
-**Stochastic Gradient Descent**
-*** Add sentence about it
+### Stochastic Gradient Descent (SGD):
+The issue with Batch Gradient Descent, is that it uses the entire training set to compute gradients at every step, which makes it very slow when the training set is large. **SGD** picks a random instance in the training set at every step and computes the gradients based only on that single instance, which makes the algorithm much faster and only requires one instance to be in memory at every iteration. However, due to it's stochastic (i.e. random) nature, this algorithm doesn't gently decrease like with Batch Gradient Descent, it bounces up and down, decreasing only on average. When you have an irregular cost function, SGD has a better chance of finding the global minimum compared to Batch Gradient Descent because it can jump out of the local minima.
+* Overtime, SGD will end up very close to the minimum, but even after that, it will continue to bounce around, never settling down.
+    * A solution to this is **simulated annealing**, where the learning rate is gradually reduced. The steps start out large to escape local minima, and get smaller andn smaller allowing the algorithm to settle at the global minimum.
+    * The **learning schedule** is the function that determines the learning rate at each iteration
+* Since instances are chosen randomly, some instances may be picked several times per **epoch**, where as others may not ever be chosen. 
+    * This will converges slower, but if you want to go through each instance at each epoch, shuffle the training set, go through each instance, and repeat again. 
 
-## Implementation
-*** Add different example using library of Gradient Descent
+### Mini-batch Gradient Descent:
+Mini-batch GD computes the gradients on small random sets of instances called **mini-batches**. 
+* This algorithm's progress is less erratic than with SGD, especially with fairly large mini-batches. 
+* Compared to SGD, mini-batch GD may get closer to the minimum but it may also be harder to escape from a local minima.
+* Main advantage of mini-batch GD compared to SGD, is that you can get a performance boost from hardware optimization of matrix operations. 
 
+
+## Implementation (code)
+* m = number of training instances
+* n = number of features
+
+### Batch Gradient Descent Example:
 ```
 eta = 0.1 # learning rate
 n_iterations = 1000
@@ -76,10 +91,40 @@ array([[ 4.21509616],
        [ 2.77011339]])
 ```
 
+### Stochastic Gradient Descent (SGD) Example:
+* Iterate by m iterations
+* Each round is called an **epoch**
+```
+n_epochs = 50
+t0, t1 = 5, 50 # learning schedule hyperparameters
+
+def learning_schedule(t):
+    return t0 / (t + t1)
+
+theta = np.random.randn(2, 1) # random initialization
+
+for epoch in range(n_epochs):
+    for i in range(m):
+        random_index = np.random.randint(m)
+        xi = X_b[random_index:random_index+1]
+        yi = y[random_index:random_index+1]
+        gradients = 2 * xi.T.dot(xi.dot(theta) - yi)
+        eta = learning_schedule(epoch * m + i)
+        theta = theata - eta * gradients
+
+# resulting theta
+theta
+array([[ 4.21076011],
+       [ 2.74856079]])
+```
+
+
+
 Note:
 * Ensure that all features have a similar scale when using Gradient Descent, otherwise it will take much longer to converge
     * use Scikit-Learn's `StandardScaler` class.
 
 
-*** Site textbook 
+## Source
+Geron, A. (2017). Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow: concepts, tools, and techniques to build intelligent systems (1st ed.). O'Reilly Media, Inc. 
 
